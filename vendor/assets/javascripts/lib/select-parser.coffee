@@ -30,6 +30,7 @@ class SelectParser
           options_index: @options_index
           value: option.value
           text: option.text
+          search_info: option.getAttribute('data-search-info')
           html: option.innerHTML
           selected: option.selected
           disabled: if group_disabled is true then group_disabled else option.disabled
