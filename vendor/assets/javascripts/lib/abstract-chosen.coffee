@@ -131,9 +131,8 @@ class AbstractChosen
 
     searchText = this.get_search_text()
     escapedSearchText = searchText.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")
-    regexAnchor = if @search_contains then "" else "^"
-    regex = new RegExp(regexAnchor + escapedSearchText, 'i')
     zregex = new RegExp(escapedSearchText, 'i')
+    regex = this.get_search_regex(escapedSearchText)
 
     for option in @results_data
 
@@ -150,10 +149,10 @@ class AbstractChosen
           results_group = @results_data[option.group_array_index]
           results += 1 if results_group.active_options is 0 and results_group.search_match
           results_group.active_options += 1
-
+                
         unless option.group and not @group_search
 
-          option.search_text = if option.group then option.label else option.html
+          option.search_text = if option.group then option.label else option.text
           option.searchable_text = option.search_text
           option.searchable_text += option.search_info if option.search_info?
           option.search_match = this.search_string_match(option.searchable_text, regex)
@@ -168,7 +167,7 @@ class AbstractChosen
               option.search_text = text.substr(0, startpos) + '<em>' + text.substr(startpos)
 
             results_group.group_match = true if results_group?
-
+          
           else if option.group_array_index? and @results_data[option.group_array_index].search_match
             option.search_match = true
 
@@ -180,6 +179,10 @@ class AbstractChosen
     else
       this.update_results_content this.results_option_build()
       this.winnow_results_set_highlight()
+
+  get_search_regex: (escaped_search_string) ->
+    regex_anchor = if @search_contains then "" else "^"
+    new RegExp(regex_anchor + escaped_search_string, 'i')
 
   search_string_match: (search_string, regex) ->
     if regex.test search_string
@@ -225,6 +228,9 @@ class AbstractChosen
       when 9, 38, 40, 16, 91, 17
         # don't do anything on these keys
       else this.results_search()
+
+  clipboard_event_checker: (evt) ->
+    setTimeout (=> this.results_search()), 50
 
   container_width: ->
     return if @options.width? then @options.width else "#{@form_field.offsetWidth}px"
